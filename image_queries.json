@@ -1,0 +1,18 @@
+{
+  "sausage": [
+    "sausage",
+    "sausages",
+    "one sausage",
+    "short sausage",
+    "single sausage"
+  ],
+  "non_sausage": [
+    "salad",
+    "chicken wings",
+    "cheeseburger",
+    "nachos",
+    "prime rib",
+    "spaghetti",
+    "pizza"
+  ]
+}

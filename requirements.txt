@@ -1,0 +1,4 @@
+tk
+Pillow
+beautifulsoup4
+requests
