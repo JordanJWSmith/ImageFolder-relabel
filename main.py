@@ -42,8 +42,10 @@ class SecondWindow(tk.Frame):
         self.master = master
         self.button_name = button_name
         self.file_paths = [os.path.join(root_dir, self.button_name, cl) for cl in dir_tree[root_dir][button_name].keys()]
-        print(self.file_paths)
         self.current_image_index = 0
+        self.processed_images = {}
+        self.current_image = tk.StringVar()
+        self.filenames = self.get_filenames()
         # self.image_filename = tk.StringVar()
 
         self.label = tk.Label(self)
@@ -74,24 +76,31 @@ class SecondWindow(tk.Frame):
         self.next_button.pack(side="left", padx=20, pady=20)
         # self.prev_button.place(relx=1, rely=1, anchor='se')
 
+        # TODO: Interacting with the radio button adds a new record to a dict. Use this to refactor.
+
         self.radio_frame = tk.Frame(self)
         self.radio_frame.pack(side='bottom')
 
         self.selected_option = tk.StringVar()
 
+        self.selected_option.trace('w', self.on_option_change)
+
         for lab in dir_tree[root_dir][button_name].keys():
             self.option_radio = tk.Radiobutton(self.radio_frame, text=lab, variable=self.selected_option, value=lab)
             self.option_radio.pack(side='left')
 
-
-
         # Display the first image
         self.display_images()
+        # print(self.current_image.get())
 
         # self.pack(side="top", fill="both", expand=True)
         # self.place(relx=0.5, rely=0.5, anchor='center')
         self.pack()
 
+    def on_option_change(self, *args):
+        if self.current_image.get():
+            self.processed_images[self.current_image.get()] = self.selected_option.get()
+        print('processed_images updated:', self.processed_images)
 
     def on_next_click(self):
         self.current_image_index += 1
@@ -104,35 +113,41 @@ class SecondWindow(tk.Frame):
     def set_image_filename(self, image_path):
         self.image_filename.set(image_path)
 
-    def display_images(self):
-        # TODO: Move this to SecondWindow class - no need to run it every time func is called
+    def get_filenames(self):
         filenames = []
         try:
             for pathe in self.file_paths:
-                filenames += [os.path.join(pathe, f) for f in os.listdir(pathe) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                filenames += [os.path.join(pathe, f) for f in os.listdir(pathe) if
+                              f.lower().endswith(('.png', '.jpg', '.jpeg'))]
         except OSError:
             tk.messagebox.showerror("Error", "Invalid directory path")
             self.on_back_click()
             return
+        return filenames
+
+    def display_images(self):
 
         # TODO: Set maximum image size and resize
         # TODO: Easier navigation - jump to other class, filenames listed down the side
 
         # match window size to the largest image in the directory
         width, height = 0, 0
-        for f in filenames:
+        for f in self.filenames:
             image = Image.open(f)
             width, height = max(image.size[0], width), max(image.size[1], height)
         self.master.geometry(f"{width+100}x{height+200}")
 
-        if 0 <= self.current_image_index < len(filenames):
-            image_path = filenames[self.current_image_index]
+        if 0 <= self.current_image_index < len(self.filenames):
+            image_path = self.filenames[self.current_image_index]
+            self.label.config(text=os.path.split(image_path)[-1])
+            self.current_image.set(image_path)
 
             # set display label as filename
-            self.label.config(text=os.path.split(image_path)[-1])
-            image_label = os.path.normpath(image_path).split(os.path.sep)[-2]
-            self.selected_option.set(image_label)
-
+            if image_path in self.processed_images.keys():
+                self.selected_option.set(self.processed_images[image_path])
+            else:
+                image_label = os.path.normpath(image_path).split(os.path.sep)[-2]
+                self.selected_option.set(image_label)
 
             image = Image.open(image_path)
             background = Image.new('RGBA', (width, height), (255, 255, 255, 255))
@@ -155,6 +170,8 @@ class SecondWindow(tk.Frame):
         else:
             self.image_label.configure(image=None)
             tk.messagebox.showinfo("Info", "No more images to display")
+
+        # print(self.processed_images)
 
     def on_back_click(self):
         self.master.switch_frame(MainWindow)
