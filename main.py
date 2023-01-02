@@ -89,6 +89,21 @@ class SecondWindow(tk.Frame):
             self.option_radio = tk.Radiobutton(self.radio_frame, text=lab, variable=self.selected_option, value=lab)
             self.option_radio.pack(side='left')
 
+        # Create a frame to hold the Listbox widget
+        self.list_frame = tk.Frame(self)
+        self.list_frame.pack(side='left')
+
+        # Create a Listbox widget and populate it with the filenames from the self.filenames list
+        self.image_list = tk.Listbox(self.list_frame, selectmode='single')
+        for filename in self.filenames:
+            self.image_list.insert('end', filename)
+
+        # Bind a double-click event to the Listbox widget
+        self.image_list.bind('<Double-Button-1>', self.on_list_double_click)
+
+        # Pack the Listbox widget
+        self.image_list.pack()
+
         # Display the first image
         self.display_images()
         # print(self.current_image.get())
@@ -96,6 +111,14 @@ class SecondWindow(tk.Frame):
         # self.pack(side="top", fill="both", expand=True)
         # self.place(relx=0.5, rely=0.5, anchor='center')
         self.pack()
+
+    def on_list_double_click(self, event):
+        selection = self.image_list.curselection()
+        if not selection:
+            return
+        selected_filename = self.image_list.get(selection[0])
+        self.current_image_index = self.filenames.index(selected_filename)
+        self.display_images()
 
     def on_option_change(self, *args):
         if self.current_image.get():
