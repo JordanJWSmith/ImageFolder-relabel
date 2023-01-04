@@ -48,22 +48,19 @@ class SecondWindow(tk.Frame):
         self.filenames = self.get_filenames()
         # self.image_filename = tk.StringVar()
 
-        self.label = tk.Label(self)
+        self.base_frame = tk.Frame(self)
+        self.base_frame.pack(side='right')
+
+        self.label = tk.Label(self.base_frame)
         self.label.pack(side='top')
         # self.label.place(relx=0.5, rely=0.5, anchor='n')
 
         # Create a label to display the image
-        self.image_label = tk.Label(self)
-        self.image_label.pack()
+        self.image_label = tk.Label(self.base_frame)
+        self.image_label.pack(side='top')
         # self.image_label.place(relx=0.5, rely=0.5, anchor='center')
 
-        self.back_button_frame = tk.Frame(self)
-        self.back_button_frame.pack(side='bottom')
-
-        self.back_button = tk.Button(self.back_button_frame, text="Main Menu", command=lambda: self.on_back_click())
-        self.back_button.pack(side="left", padx=20, pady=20)
-
-        self.button_frame = tk.Frame(self)
+        self.button_frame = tk.Frame(self.base_frame)
         self.button_frame.pack(side='bottom')
         # self.button_frame.place(relx=0.5, rely=1, anchor='s')
 
@@ -78,7 +75,7 @@ class SecondWindow(tk.Frame):
 
         # TODO: Interacting with the radio button adds a new record to a dict. Use this to refactor.
 
-        self.radio_frame = tk.Frame(self)
+        self.radio_frame = tk.Frame(self.base_frame)
         self.radio_frame.pack(side='bottom')
 
         self.selected_option = tk.StringVar()
@@ -96,13 +93,20 @@ class SecondWindow(tk.Frame):
         # Create a Listbox widget and populate it with the filenames from the self.filenames list
         self.image_list = tk.Listbox(self.list_frame, selectmode='single')
         for filename in self.filenames:
-            self.image_list.insert('end', filename)
+            self.image_list.insert('end', os.path.split(filename)[-1])
+            # self.image_list.insert('end', filename)
 
-        # Bind a double-click event to the Listbox widget
+        # Bind a double click event to the Listbox widget
         self.image_list.bind('<Double-Button-1>', self.on_list_double_click)
 
         # Pack the Listbox widget
-        self.image_list.pack()
+        self.image_list.pack(side='top')
+
+        self.back_button_frame = tk.Frame(self.list_frame)
+        self.back_button_frame.pack(side='bottom')
+
+        self.back_button = tk.Button(self.back_button_frame, text="Main Menu", command=lambda: self.on_back_click())
+        self.back_button.pack(side="left", padx=20, pady=20)
 
         # Display the first image
         self.display_images()
@@ -114,10 +118,13 @@ class SecondWindow(tk.Frame):
 
     def on_list_double_click(self, event):
         selection = self.image_list.curselection()
+        # print('selection:', selection)
         if not selection:
             return
-        selected_filename = self.image_list.get(selection[0])
-        self.current_image_index = self.filenames.index(selected_filename)
+        # selected_filename = self.image_list.get(selection[0])
+        # self.current_image_index = self.filenames.index(selected_filename)
+        # print('image index', self.current_image_index)
+        self.current_image_index = selection[0]
         self.display_images()
 
     def on_option_change(self, *args):
@@ -158,7 +165,7 @@ class SecondWindow(tk.Frame):
         for f in self.filenames:
             image = Image.open(f)
             width, height = max(image.size[0], width), max(image.size[1], height)
-        self.master.geometry(f"{width+100}x{height+200}")
+        self.master.geometry(f"{width+400}x{height+200}")
 
         if 0 <= self.current_image_index < len(self.filenames):
             image_path = self.filenames[self.current_image_index]
