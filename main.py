@@ -91,9 +91,14 @@ class SecondWindow(tk.Frame):
         self.list_frame.pack(side='left')
 
         # Create a Listbox widget and populate it with the filenames from the self.filenames list
-        self.image_list = tk.Listbox(self.list_frame, selectmode='single')
+        max_filename_length = max([len(os.path.split(filename)[-1]) for filename in self.filenames])
+        imlist_width = max(20, max_filename_length)
+
+        self.image_list = tk.Listbox(self.list_frame, selectmode='single', width=imlist_width, font=('Helvetica', 12))
         for filename in self.filenames:
-            self.image_list.insert('end', os.path.split(filename)[-1])
+            filename_tail = os.path.split(filename)[-1]
+            # self.image_list.configure(width=max(len(filename), imlist_width))
+            self.image_list.insert('end', filename_tail)
             # self.image_list.insert('end', filename)
 
         # Bind a double click event to the Listbox widget
@@ -101,12 +106,19 @@ class SecondWindow(tk.Frame):
 
         # Pack the Listbox widget
         self.image_list.pack(side='top')
+        self.image_list.selection_set(self.current_image_index)
+
+        self.submit_button_frame = tk.Frame(self.list_frame)
+        self.submit_button_frame.pack(side='bottom')
+
+        self.submit_button = tk.Button(self.submit_button_frame, text='Submit')
+        self.submit_button.pack(side="bottom", padx=20, pady=20)
 
         self.back_button_frame = tk.Frame(self.list_frame)
         self.back_button_frame.pack(side='bottom')
 
         self.back_button = tk.Button(self.back_button_frame, text="Main Menu", command=lambda: self.on_back_click())
-        self.back_button.pack(side="left", padx=20, pady=20)
+        self.back_button.pack(side="bottom", padx=20, pady=20)
 
         # Display the first image
         self.display_images()
@@ -133,12 +145,18 @@ class SecondWindow(tk.Frame):
         print('processed_images updated:', self.processed_images)
 
     def on_next_click(self):
+        self.image_list.selection_clear(0, 'end')
         self.current_image_index += 1
         self.display_images()
+        self.image_list.selection_set(self.current_image_index)
+        self.image_list.see(self.current_image_index)
 
     def on_prev_click(self):
+        self.image_list.selection_clear(0, 'end')
         self.current_image_index -= 1
         self.display_images()
+        self.image_list.selection_set(self.current_image_index)
+        self.image_list.see(self.current_image_index)
 
     def set_image_filename(self, image_path):
         self.image_filename.set(image_path)
@@ -166,6 +184,7 @@ class SecondWindow(tk.Frame):
             image = Image.open(f)
             width, height = max(image.size[0], width), max(image.size[1], height)
         self.master.geometry(f"{width+400}x{height+200}")
+        self.image_list.configure(height=int(height/21))
 
         if 0 <= self.current_image_index < len(self.filenames):
             image_path = self.filenames[self.current_image_index]
