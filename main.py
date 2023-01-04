@@ -23,6 +23,7 @@ class MainWindow(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
+        self.configure(bg='white')
 
         for ix, _dir in enumerate(dir_tree[root_dir].keys()):
             self.button = tk.Button(self, text=_dir, command=lambda k=_dir: self.on_button_click(k))
@@ -46,57 +47,74 @@ class SecondWindow(tk.Frame):
         self.processed_images = {}
         self.current_image = tk.StringVar()
         self.filenames = self.get_filenames()
-        # self.image_filename = tk.StringVar()
 
-        self.base_frame = tk.Frame(self)
+        self.configure(bg='white')
+
+        self.base_frame = tk.Frame(self, bg='white')
         self.base_frame.pack(side='right')
 
-        self.label = tk.Label(self.base_frame)
+        self.label = tk.Label(self.base_frame, font=('Helvetica', 12), bg='white')
         self.label.pack(side='top')
         # self.label.place(relx=0.5, rely=0.5, anchor='n')
 
         # Create a label to display the image
-        self.image_label = tk.Label(self.base_frame)
+        self.image_label = tk.Label(self.base_frame, bg='white')
         self.image_label.pack(side='top')
         # self.image_label.place(relx=0.5, rely=0.5, anchor='center')
 
-        self.button_frame = tk.Frame(self.base_frame)
+        self.button_frame = tk.Frame(self.base_frame, bg='white')
         self.button_frame.pack(side='bottom')
         # self.button_frame.place(relx=0.5, rely=1, anchor='s')
 
         # Create buttons to move to the next or previous image
-        self.prev_button = tk.Button(self.button_frame, text="Previous", command=self.on_prev_click)
+        self.prev_button = tk.Button(self.button_frame, text="Previous", font=('Helvetica', 12), command=self.on_prev_click)
         self.prev_button.pack(side="left", padx=20, pady=20)
         # self.prev_button.place(relx=0, rely=1, anchor='sw')
 
-        self.next_button = tk.Button(self.button_frame, text="Next", command=self.on_next_click)
+        self.next_button = tk.Button(self.button_frame, text="Next", font=('Helvetica', 12), command=self.on_next_click)
         self.next_button.pack(side="left", padx=20, pady=20)
         # self.prev_button.place(relx=1, rely=1, anchor='se')
 
         # TODO: Interacting with the radio button adds a new record to a dict. Use this to refactor.
 
-        self.radio_frame = tk.Frame(self.base_frame)
+        self.radio_frame = tk.Frame(self.base_frame, bg='white')
         self.radio_frame.pack(side='bottom')
 
         self.selected_option = tk.StringVar()
-
         self.selected_option.trace('w', self.on_option_change)
 
         for lab in dir_tree[root_dir][button_name].keys():
-            self.option_radio = tk.Radiobutton(self.radio_frame, text=lab, variable=self.selected_option, value=lab)
+            self.option_radio = tk.Radiobutton(self.radio_frame, text=lab, font=('Helvetica', 12),
+                                               variable=self.selected_option, value=lab, pady=20, bg='white')
             self.option_radio.pack(side='left')
 
         # Create a frame to hold the Listbox widget
-        self.list_frame = tk.Frame(self)
+        self.list_frame = tk.Frame(self, bg='white')
         self.list_frame.pack(side='left')
 
+        self.back_button_frame = tk.Frame(self.list_frame)
+        self.back_button_frame.pack(side='top')
+        # self.back_button_frame.place(relx=5, rely=5, anchor='sw')
+
+        # TODO: Fix positioning
+        self.back_button = tk.Button(self.base_frame, text="Main Menu", command=lambda: self.on_back_click(), bg='white')
+        # self.back_button.pack(side="left")
+        self.back_button.place(relx=0, rely=0, anchor='ne')
+
+        self.chosen_dir_label = tk.Label(self.list_frame, text=os.path.join(self.button_name, ''),
+                                         font=('Helvetica', 12), bg='white')
+        self.chosen_dir_label.pack(side='top')
+
         # Create a Listbox widget and populate it with the filenames from the self.filenames list
-        max_filename_length = max([len(os.path.split(filename)[-1]) for filename in self.filenames])
+        max_filename_length = max([len(os.path.join(os.path.basename(os.path.dirname(filename)),
+                                                    os.path.basename(filename)))
+                                   for filename in self.filenames])
         imlist_width = max(20, max_filename_length)
 
         self.image_list = tk.Listbox(self.list_frame, selectmode='single', width=imlist_width, font=('Helvetica', 12))
+
         for filename in self.filenames:
-            filename_tail = os.path.split(filename)[-1]
+            filename_tail = os.path.join(os.path.basename(os.path.dirname(filename)), os.path.basename(filename))
             # self.image_list.configure(width=max(len(filename), imlist_width))
             self.image_list.insert('end', filename_tail)
             # self.image_list.insert('end', filename)
@@ -108,17 +126,18 @@ class SecondWindow(tk.Frame):
         self.image_list.pack(side='top')
         self.image_list.selection_set(self.current_image_index)
 
-        self.submit_button_frame = tk.Frame(self.list_frame)
+        self.submit_button_frame = tk.Frame(self.list_frame, bg='white')
         self.submit_button_frame.pack(side='bottom')
 
-        self.submit_button = tk.Button(self.submit_button_frame, text='Submit')
+        self.submit_button = tk.Button(self.submit_button_frame, text='Submit', font=('Helvetica', 12))
         self.submit_button.pack(side="bottom", padx=20, pady=20)
 
-        self.back_button_frame = tk.Frame(self.list_frame)
-        self.back_button_frame.pack(side='bottom')
-
-        self.back_button = tk.Button(self.back_button_frame, text="Main Menu", command=lambda: self.on_back_click())
-        self.back_button.pack(side="bottom", padx=20, pady=20)
+        self.width, self.height = 0, 0
+        for f in self.filenames:
+            image = Image.open(f)
+            self.width, self.height = max(image.size[0], self.width), max(image.size[1], self.height)
+        self.master.geometry(f"{self.width + 400}x{self.height + 200}")
+        self.image_list.configure(height=int(self.height / 21))
 
         # Display the first image
         self.display_images()
@@ -162,29 +181,20 @@ class SecondWindow(tk.Frame):
         self.image_filename.set(image_path)
 
     def get_filenames(self):
-        filenames = []
+        f_names = []
         try:
             for pathe in self.file_paths:
-                filenames += [os.path.join(pathe, f) for f in os.listdir(pathe) if
+                f_names += [os.path.join(pathe, f) for f in os.listdir(pathe) if
                               f.lower().endswith(('.png', '.jpg', '.jpeg'))]
         except OSError:
             tk.messagebox.showerror("Error", "Invalid directory path")
             self.on_back_click()
             return
-        return filenames
+        return f_names
 
     def display_images(self):
 
-        # TODO: Set maximum image size and resize
-        # TODO: Easier navigation - jump to other class, filenames listed down the side
-
-        # match window size to the largest image in the directory
-        width, height = 0, 0
-        for f in self.filenames:
-            image = Image.open(f)
-            width, height = max(image.size[0], width), max(image.size[1], height)
-        self.master.geometry(f"{width+400}x{height+200}")
-        self.image_list.configure(height=int(height/21))
+        # TODO: Set maximum image size as a percentage of screen size and resize
 
         if 0 <= self.current_image_index < len(self.filenames):
             image_path = self.filenames[self.current_image_index]
@@ -199,8 +209,8 @@ class SecondWindow(tk.Frame):
                 self.selected_option.set(image_label)
 
             image = Image.open(image_path)
-            background = Image.new('RGBA', (width, height), (255, 255, 255, 255))
-            offset = ((width - image.size[0]) // 2, (height - image.size[1]) // 2)
+            background = Image.new('RGBA', (self.width, self.height), (255, 255, 255, 255))
+            offset = ((self.width - image.size[0]) // 2, (self.height - image.size[1]) // 2)
             background.paste(image, offset)
             photo_image = ImageTk.PhotoImage(background)
             self.image_label.configure(image=photo_image)
@@ -209,7 +219,8 @@ class SecondWindow(tk.Frame):
             if self.current_image_index == 0:
                 self.prev_button.config(state="disabled")
                 # If this is the last image, disable the 'Next' button
-            elif self.current_image_index == len(filenames) - 1:
+            elif self.current_image_index == len(self.filenames) - 1:
+                print('index:', self.current_image_index, 'length filenames:', len(self.filenames))
                 self.next_button.config(state="disabled")
                 # If this is not the first or last image, enable both buttons
             else:
@@ -232,6 +243,7 @@ class MainApp(tk.Tk):
         self.frame = None
         self.geometry('500x500')
         self.switch_frame(MainWindow)
+        self.configure(bg='white')
 
     def switch_frame(self, frame_class, *args):
         new_frame = frame_class(self, *args)
