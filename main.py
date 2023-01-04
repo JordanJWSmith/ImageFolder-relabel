@@ -60,29 +60,22 @@ class SecondWindow(tk.Frame):
 
         self.label = tk.Label(self.base_image_frame, font=('Helvetica', 12, 'bold'), bg='white')
         self.label.pack(side='top')
-        # self.label.place(relx=0.5, rely=0.5, anchor='n')
 
         # Create a label to display the image
         self.image_label = tk.Label(self.base_image_frame, bg='white')
         self.image_label.pack(side='top')
-        # self.image_label.place(relx=0.5, rely=0.5, anchor='center')
 
         self.button_frame = tk.Frame(self.base_image_frame, bg='white')
         self.button_frame.pack(side='bottom')
-        # self.button_frame.place(relx=0.5, rely=1, anchor='s')
 
         # Create buttons to move to the next or previous image
         self.prev_button = tk.Button(self.button_frame, text="Previous", font=('Helvetica', 12),
                                      command=self.on_prev_click, bg='#555555', fg='white')
         self.prev_button.pack(side="left", padx=20, pady=20)
-        # self.prev_button.place(relx=0, rely=1, anchor='sw')
 
         self.next_button = tk.Button(self.button_frame, text="Next", font=('Helvetica', 12),
                                      command=self.on_next_click, bg='#555555', fg='white')
         self.next_button.pack(side="left", padx=20, pady=20)
-        # self.prev_button.place(relx=1, rely=1, anchor='se')
-
-        # TODO: Interacting with the radio button adds a new record to a dict. Use this to refactor.
 
         self.radio_frame = tk.Frame(self.base_image_frame, bg='white')
         self.radio_frame.pack(side='bottom')
@@ -91,9 +84,8 @@ class SecondWindow(tk.Frame):
         self.selected_option.trace('w', self.on_option_change)
 
         # TODO: Add keyboard bindings to radio buttons and image navigation
-
-        for lab in dir_tree[root_dir][button_name].keys():
-            self.option_radio = tk.Radiobutton(self.radio_frame, text=lab, font=('Helvetica', 12),
+        for ix, lab in enumerate(dir_tree[root_dir][button_name].keys()):
+            self.option_radio = tk.Radiobutton(self.radio_frame, text=f'{ix+1}) {lab}', font=('Helvetica', 12),
                                                variable=self.selected_option, value=lab, pady=20, bg='white')
             self.option_radio.pack(side='left')
 
@@ -101,13 +93,8 @@ class SecondWindow(tk.Frame):
         self.list_frame = tk.Frame(self.root_frame, bg='white')
         self.list_frame.pack(side='left')
 
-        # self.back_button_frame = tk.Frame(self.list_frame)
-        # self.back_button_frame.pack(side='top')
-        # self.back_button_frame.place(relx=5, rely=5, anchor='sw')
-
         self.back_button = tk.Button(self.root_frame, text="Main Menu", command=lambda: self.on_back_click(),
                                      bg='white', padx=5, pady=5)
-        # self.back_button.pack(side="left")
         self.back_button.place(relx=0, rely=0, anchor='nw')
 
         self.chosen_dir_label = tk.Label(self.list_frame, text=os.path.join(self.button_name, ''),
@@ -118,10 +105,11 @@ class SecondWindow(tk.Frame):
         max_filename_length = max([len(os.path.join(os.path.basename(os.path.dirname(filename)),
                                                     os.path.basename(filename))) for filename in self.filenames])
         imlist_width = max(20, max_filename_length)
-
         self.image_list = tk.Listbox(self.list_frame, selectmode='single', width=imlist_width,
                                      font=('Helvetica', 12), relief='sunken', selectbackground='#008CBA')
         self.populate_image_list()
+
+        # TODO: Change background colour of entry upon label change?
 
         # for filename in self.filenames:
         #     filename_tail = os.path.join(os.path.basename(os.path.dirname(filename)), os.path.basename(filename))
@@ -204,10 +192,8 @@ class SecondWindow(tk.Frame):
                           os.path.join(root_dir, self.button_name, label, os.path.basename(f_name)))
                     os.rename(f_name, new_path)
                 except Exception as e:
-                    # TODO: more specific Exception clause
-                    print(f'Error refactoring {f_name}. Error message:\n{e}')
-        # self.master.update()
-        print('updated?')
+                    tk.messagebox.showinfo("Info", f'Error refactoring {f_name}. Error message:\n{e}')
+        # TODO: Refresh window/contents after refactoring
         self.refresh_window()
 
         # self.get_filenames()
@@ -215,10 +201,7 @@ class SecondWindow(tk.Frame):
         # self.display_images()
 
     def refresh_window(self):
-        # Destroy the current SecondWindow instance
-        # self.master.destroy()
-        # Create a new SecondWindow instance
-        # second_window = SecondWindow(self.master)
+        # Currently does nothing
         self.master.update()
 
     def populate_image_list(self):
