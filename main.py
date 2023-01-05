@@ -171,7 +171,7 @@ class SecondWindow(tk.Frame):
     def on_option_change(self, *args):
         if self.current_image.get():
             self.processed_images[self.current_image.get()] = self.selected_option.get()
-        # print('processed_images updated:', self.processed_images)
+            self.submit_button_state()
 
     def on_next_click(self):
         self.image_list.selection_clear(0, 'end')
@@ -186,9 +186,6 @@ class SecondWindow(tk.Frame):
         self.display_images()
         self.image_list.selection_set(self.current_image_index)
         self.image_list.see(self.current_image_index)
-
-    # def set_image_filename(self, image_path):
-    #     self.image_filename.set(image_path)
 
     def get_filenames(self):
         f_names = []
@@ -212,7 +209,6 @@ class SecondWindow(tk.Frame):
                     os.rename(f_name, new_path)
                 except Exception as e:
                     tk.messagebox.showinfo("Info", f'Error refactoring {f_name}. Error message:\n{e}')
-        # TODO: Refresh window/contents after refactoring
         self.refresh_window()
 
     def refresh_window(self):
@@ -223,15 +219,22 @@ class SecondWindow(tk.Frame):
         self.populate_image_list()
         self.display_images()
 
-
     def build_filepaths(self):
-        self.file_paths = [os.path.join(root_dir, self.button_name, cl) for cl in self.dir_tree[root_dir][self.button_name].keys()]
+        self.file_paths = [os.path.join(root_dir, self.button_name, cl)
+                           for cl in self.dir_tree[root_dir][self.button_name].keys()]
 
     def populate_image_list(self):
         self.image_list.delete(0, "end")
         for filename in self.filenames:
             filename_tail = os.path.join(os.path.basename(os.path.dirname(filename)), os.path.basename(filename))
             self.image_list.insert('end', filename_tail)
+
+    def submit_button_state(self):
+        for f_name, label in self.processed_images.items():
+            if os.path.basename(os.path.dirname(f_name)) != label:
+                self.submit_button.config(state="normal")
+                return
+        self.submit_button.config(state="disabled")
 
     def display_images(self):
 
