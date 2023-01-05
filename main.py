@@ -7,16 +7,17 @@ import os
 # TODO: take root directory from config.json file
 root_dir = 'input'
 
-dir_tree = {}
-for dir_path, dir_names, filenames in os.walk(root_dir):
-    parts = dir_path.split(os.sep)
-    curr = dir_tree
-    if len(dir_names):
-        for p in parts:
-            curr = curr.setdefault(p, {})
-    else:
-        for p in parts:
-            curr = curr.setdefault(p, [file for file in filenames])
+# TODO: Move to function. Check for directory and issue error message if it doesn't exist
+# dir_tree = {}
+# for dir_path, dir_names, filenames in os.walk(root_dir):
+#     parts = dir_path.split(os.sep)
+#     curr = dir_tree
+#     if len(dir_names):
+#         for p in parts:
+#             curr = curr.setdefault(p, {})
+#     else:
+#         for p in parts:
+#             curr = curr.setdefault(p, [file for file in filenames])
 
 
 class MainWindow(tk.Frame):
@@ -24,25 +25,43 @@ class MainWindow(tk.Frame):
         super().__init__(master)
         self.master = master
         self.configure(bg='white')
+        self.dir_tree = {}
 
-        for ix, _dir in enumerate(dir_tree[root_dir].keys()):
+        self.build_dir_tree()
+
+        for ix, _dir in enumerate(self.dir_tree[root_dir].keys()):
             self.button = tk.Button(self, text=_dir, command=lambda k=_dir: self.on_button_click(k))
             self.button.pack(side='left', padx=20)
-            # self.button.place(relx=0.5, rely=0.5, anchor='center')
 
         self.pack(side="top", fill="both", expand=True)
-        # self.place(relx=0.5, rely=0.5, anchor='center')
 
     def on_button_click(self, button_name):
-        self.master.switch_frame(SecondWindow, button_name)
+        self.master.switch_frame(SecondWindow, button_name, self.dir_tree, self.build_dir_tree)
+
+    def build_dir_tree(self):
+        # print('before: ', self.dir_tree)
+        dir_tree = {}
+        for dir_path, dir_names, filenames in os.walk(root_dir):
+            parts = dir_path.split(os.sep)
+            curr = dir_tree
+            if len(dir_names):
+                for p in parts:
+                    curr = curr.setdefault(p, {})
+            else:
+                for p in parts:
+                    curr = curr.setdefault(p, [file for file in filenames])
+        self.dir_tree = dir_tree
+        # print('after:', self.dir_tree)
 
 
 class SecondWindow(tk.Frame):
-    def __init__(self, master=None, button_name=None):
+    def __init__(self, master=None, button_name=None, dir_tree=None, build_dir_tree=None):
         super().__init__(master)
         self.master = master
+        self.dir_tree = dir_tree
+        self.build_dir_tree = build_dir_tree
         self.button_name = button_name
-        self.file_paths = [os.path.join(root_dir, button_name, cl) for cl in dir_tree[root_dir][button_name].keys()]
+        self.file_paths = [os.path.join(root_dir, button_name, cl) for cl in self.dir_tree[root_dir][button_name].keys()]
         self.current_image_index = 0
         self.processed_images = {}
         self.current_image = tk.StringVar()
@@ -84,7 +103,7 @@ class SecondWindow(tk.Frame):
         self.selected_option.trace('w', self.on_option_change)
 
         # TODO: Add keyboard bindings to radio buttons and image navigation
-        for ix, lab in enumerate(dir_tree[root_dir][button_name].keys()):
+        for ix, lab in enumerate(self.dir_tree[root_dir][button_name].keys()):
             self.option_radio = tk.Radiobutton(self.radio_frame, text=f'{ix+1}) {lab}', font=('Helvetica', 12),
                                                variable=self.selected_option, value=lab, pady=20, bg='white')
             self.option_radio.pack(side='left')
@@ -196,15 +215,20 @@ class SecondWindow(tk.Frame):
         # TODO: Refresh window/contents after refactoring
         self.refresh_window()
 
-        # self.get_filenames()
-        # self.populate_image_list()
-        # self.display_images()
-
     def refresh_window(self):
-        # Currently does nothing
-        self.master.update()
+        self.processed_images = {}
+        self.build_dir_tree()
+        self.build_filepaths()
+        self.get_filenames()
+        self.populate_image_list()
+        self.display_images()
+
+
+    def build_filepaths(self):
+        self.file_paths = [os.path.join(root_dir, self.button_name, cl) for cl in self.dir_tree[root_dir][self.button_name].keys()]
 
     def populate_image_list(self):
+        self.image_list.delete(0, "end")
         for filename in self.filenames:
             filename_tail = os.path.join(os.path.basename(os.path.dirname(filename)), os.path.basename(filename))
             self.image_list.insert('end', filename_tail)

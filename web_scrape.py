@@ -70,24 +70,25 @@ def scrape_images(class_name, queries):
 
         for i, link in enumerate(image_tags):
             ignore = ['.gif', '.svg']
+            # TODO: Better way to get the extension
             if link['src'][-4:] not in ignore:
-                # print(link['src'], '||', f"{class_name}/{query.replace(' ', '_')}_{i}.jpg")
 
                 if i > 0:
                     try:
                         if i <= test_train_boundary:
                             urllib.request.urlretrieve(
                                 link['src'],
-                                f"input/train/{class_name}/{query.replace(' ', '_')}_{i}.jpg"
+                                f"input/train/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
                                 )
                             train_counter += 1
                         else:
                             urllib.request.urlretrieve(
                                 link['src'],
-                                f"input/valid/{class_name}/{query.replace(' ', '_')}_{i}.jpg"
+                                f"input/valid/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
                                 )
                             test_counter += 1
-                    except:
+                    except Exception as e:
+                        print(f'Error sourcing {link["src"]}. Error message: {e}')
                         error_counter += 1
 
         print(f'Saved {len(image_tags) - error_counter} {query} images')
