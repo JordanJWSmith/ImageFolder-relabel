@@ -128,14 +128,6 @@ class SecondWindow(tk.Frame):
                                      font=('Helvetica', 12), relief='sunken', selectbackground='#008CBA')
         self.populate_image_list()
 
-        # TODO: Change background colour of entry upon label change?
-
-        # for filename in self.filenames:
-        #     filename_tail = os.path.join(os.path.basename(os.path.dirname(filename)), os.path.basename(filename))
-        #     # self.image_list.configure(width=max(len(filename), imlist_width))
-        #     self.image_list.insert('end', filename_tail)
-        #     # self.image_list.insert('end', filename)
-
         # Bind a double click event to the Listbox widget
         self.image_list.bind('<Double-Button-1>', self.on_list_double_click)
 
@@ -171,6 +163,9 @@ class SecondWindow(tk.Frame):
     def on_option_change(self, *args):
         if self.current_image.get():
             self.processed_images[self.current_image.get()] = self.selected_option.get()
+            if os.path.basename(os.path.dirname(self.current_image.get())) != self.selected_option.get():
+                print(f'index {self.current_image_index}: {os.path.basename(os.path.dirname(self.current_image.get()))} != {self.selected_option.get()}')
+                self.image_list.itemconfigure(self.current_image_index, background="#D9F1FF")
             self.submit_button_state()
 
     def on_next_click(self):
@@ -210,6 +205,9 @@ class SecondWindow(tk.Frame):
                 except Exception as e:
                     tk.messagebox.showinfo("Info", f'Error refactoring {f_name}. Error message:\n{e}')
         self.refresh_window()
+        self.image_list.selection_clear(0, 'end')
+        self.image_list.selection_set(self.current_image_index)
+        self.image_list.see(self.current_image_index)
 
     def refresh_window(self):
         self.processed_images = {}
