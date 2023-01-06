@@ -89,13 +89,14 @@ class SecondWindow(tk.Frame):
         self.selected_option = tk.StringVar()
         self.selected_option.trace('w', self.on_option_change)
 
-        # TODO: Add keyboard bindings to radio buttons and image navigation
-        for ix, lab in enumerate(self.dir_tree[root_dir][button_name].keys()):
+        for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
             self.option_radio = tk.Radiobutton(self.radio_frame, text=f'{ix+1}) {lab}', font=('Helvetica', 12),
-                                               variable=self.selected_option, value=lab, pady=20, bg='white')
+                                               variable=self.selected_option, value=lab, pady=20, bg='white', padx=10)
             self.option_radio.pack(side='left')
 
-        self.master.bind("<Key>", self.on_key_press)
+        # key bindings won't work with >9 classes
+        if len(self.dir_tree[root_dir][self.button_name].keys()) < 10:
+            self.master.bind("<Key>", self.on_key_press)
 
         # Create a frame to hold the Listbox widget
         self.list_frame = tk.Frame(self.root_frame, bg='white')
@@ -112,8 +113,8 @@ class SecondWindow(tk.Frame):
         # Create a Listbox widget and populate it with the filenames from the self.filenames list
         max_filename_length = max([len(os.path.join(os.path.basename(os.path.dirname(filename)),
                                                     os.path.basename(filename))) for filename in self.filenames])
-        imlist_width = max(20, max_filename_length)
-        self.image_list = tk.Listbox(self.list_frame, selectmode='single', width=imlist_width,
+        image_list_width = max(20, max_filename_length)
+        self.image_list = tk.Listbox(self.list_frame, selectmode='single', width=image_list_width,
                                      font=('Helvetica', 12), relief='sunken', selectbackground='#008CBA')
         self.populate_image_list()
 
@@ -225,13 +226,22 @@ class SecondWindow(tk.Frame):
         self.submit_button.config(state="disabled")
 
     def on_key_press(self, event):
-        # TODO: Fix key bindings
-        for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
-            if event.char == str(ix+1):
-                print(event.char, 'pressed', lab)
-                # print(self.dir_tree[root_dir][self.button_name].keys()[ix])
-                # self.selected_option.set(self.dir_tree[root_dir][self.button_name].keys()[ix])
-                self.selected_option.set(lab)
+        str_nums = [str(i) for i in range(10)]
+        next_image_key = ['Right', 'Down']
+        prev_image_key = ['Left', 'Up']
+
+        # key bindings to select radio button
+        if event.keysym in str_nums:
+            for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
+                if event.char == str(ix+1):
+                    self.selected_option.set(lab)
+
+        # key bindings to move through images
+        elif event.keysym in next_image_key:
+            self.on_next_click()
+        elif event.keysym in prev_image_key:
+            self.on_prev_click()
+
 
     def display_images(self):
 
