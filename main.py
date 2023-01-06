@@ -7,19 +7,6 @@ import os
 # TODO: take root directory from config.json file
 root_dir = 'input'
 
-# TODO: Move to function. Check for directory and issue error message if it doesn't exist
-# dir_tree = {}
-# for dir_path, dir_names, filenames in os.walk(root_dir):
-#     parts = dir_path.split(os.sep)
-#     curr = dir_tree
-#     if len(dir_names):
-#         for p in parts:
-#             curr = curr.setdefault(p, {})
-#     else:
-#         for p in parts:
-#             curr = curr.setdefault(p, [file for file in filenames])
-
-
 class MainWindow(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -108,6 +95,8 @@ class SecondWindow(tk.Frame):
                                                variable=self.selected_option, value=lab, pady=20, bg='white')
             self.option_radio.pack(side='left')
 
+        self.master.bind("<Key>", self.on_key_press)
+
         # Create a frame to hold the Listbox widget
         self.list_frame = tk.Frame(self.root_frame, bg='white')
         self.list_frame.pack(side='left')
@@ -164,8 +153,9 @@ class SecondWindow(tk.Frame):
         if self.current_image.get():
             self.processed_images[self.current_image.get()] = self.selected_option.get()
             if os.path.basename(os.path.dirname(self.current_image.get())) != self.selected_option.get():
-                print(f'index {self.current_image_index}: {os.path.basename(os.path.dirname(self.current_image.get()))} != {self.selected_option.get()}')
                 self.image_list.itemconfigure(self.current_image_index, background="#D9F1FF")
+            else:
+                self.image_list.itemconfigure(self.current_image_index, background="#FFFFFF")
             self.submit_button_state()
 
     def on_next_click(self):
@@ -233,6 +223,15 @@ class SecondWindow(tk.Frame):
                 self.submit_button.config(state="normal")
                 return
         self.submit_button.config(state="disabled")
+
+    def on_key_press(self, event):
+        # TODO: Fix key bindings
+        for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
+            if event.char == str(ix+1):
+                print(event.char, 'pressed', lab)
+                # print(self.dir_tree[root_dir][self.button_name].keys()[ix])
+                # self.selected_option.set(self.dir_tree[root_dir][self.button_name].keys()[ix])
+                self.selected_option.set(lab)
 
     def display_images(self):
 
