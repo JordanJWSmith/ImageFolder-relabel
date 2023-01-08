@@ -1,11 +1,12 @@
 import tkinter as tk
 import tkinter.messagebox
-from tkinter.ttk import *
+from tkinter import PhotoImage
 from PIL import ImageTk, Image
 import os
 
 # TODO: take root directory from config.json file
 root_dir = 'input'
+
 
 class MainWindow(tk.Frame):
     def __init__(self, master=None):
@@ -17,7 +18,8 @@ class MainWindow(tk.Frame):
         self.build_dir_tree()
 
         for ix, _dir in enumerate(self.dir_tree[root_dir].keys()):
-            self.button = tk.Button(self, text=_dir, command=lambda k=_dir: self.on_button_click(k))
+            self.button = tk.Button(self, text=_dir, command=lambda k=_dir: self.on_button_click(k),
+                                    font=('Helvetica', 12))
             self.button.pack(side='left', padx=20)
 
         self.pack(side="top", fill="both", expand=True)
@@ -75,13 +77,17 @@ class SecondWindow(tk.Frame):
         self.button_frame.pack(side='bottom')
 
         # Create buttons to move to the next or previous image
-        self.prev_button = tk.Button(self.button_frame, text="Previous", font=('Helvetica', 12),
-                                     command=self.on_prev_click, bg='#555555', fg='white')
-        self.prev_button.pack(side="left", padx=20, pady=20)
+        left_icon = tk.PhotoImage(file="icons/left.png").subsample(14, 14)
+        self.prev_button = tk.Button(self.button_frame, image=left_icon, command=self.on_prev_click,
+                                     height=50, width=50, bg='white')
+        self.prev_button.image = left_icon
+        self.prev_button.pack(side="left", padx=30, pady=20)
 
-        self.next_button = tk.Button(self.button_frame, text="Next", font=('Helvetica', 12),
-                                     command=self.on_next_click, bg='#555555', fg='white')
-        self.next_button.pack(side="left", padx=20, pady=20)
+        right_icon = tk.PhotoImage(file="icons/right.png").subsample(14, 14)
+        self.next_button = tk.Button(self.button_frame, image=right_icon, command=self.on_next_click,
+                                     height=50, width=50, bg='white')
+        self.next_button.image = right_icon
+        self.next_button.pack(side="left", padx=30, pady=20)
 
         self.radio_frame = tk.Frame(self.base_image_frame, bg='white')
         self.radio_frame.pack(side='bottom')
@@ -102,6 +108,7 @@ class SecondWindow(tk.Frame):
         self.list_frame = tk.Frame(self.root_frame, bg='white')
         self.list_frame.pack(side='left')
 
+        # TODO: Back icon instead of text
         self.back_button = tk.Button(self.root_frame, text="Main Menu", command=lambda: self.on_back_click(),
                                      bg='white', padx=5, pady=5)
         self.back_button.place(relx=0, rely=0, anchor='nw')
@@ -128,6 +135,7 @@ class SecondWindow(tk.Frame):
         self.submit_button_frame = tk.Frame(self.list_frame, bg='white')
         self.submit_button_frame.pack(side='bottom')
 
+        # TODO: Modal with 'refactor [x] images? confirmation'
         self.submit_button = tk.Button(self.submit_button_frame, text='Submit', font=('Helvetica', 12, 'bold'),
                                        bg='#008CBA', fg='white', command=lambda: self.refactor_images())
         self.submit_button.pack(side="bottom", padx=20, pady=20)
@@ -238,10 +246,11 @@ class SecondWindow(tk.Frame):
 
         # key bindings to move through images
         elif event.keysym in next_image_key:
-            self.on_next_click()
+            if self.current_image_index != len(self.filenames) - 1:
+                self.on_next_click()
         elif event.keysym in prev_image_key:
-            self.on_prev_click()
-
+            if self.current_image_index != 0:
+                self.on_prev_click()
 
     def display_images(self):
 
@@ -269,11 +278,8 @@ class SecondWindow(tk.Frame):
 
             if self.current_image_index == 0:
                 self.prev_button.config(state="disabled")
-                # If this is the last image, disable the 'Next' button
             elif self.current_image_index == len(self.filenames) - 1:
-                print('index:', self.current_image_index, 'length filenames:', len(self.filenames))
                 self.next_button.config(state="disabled")
-                # If this is not the first or last image, enable both buttons
             else:
                 self.prev_button.config(state="normal")
                 self.next_button.config(state="normal")
@@ -281,8 +287,6 @@ class SecondWindow(tk.Frame):
         else:
             self.image_label.configure(image=None)
             tk.messagebox.showinfo("Info", "No more images to display")
-
-        # print(self.processed_images)
 
     def on_back_click(self):
         self.master.switch_frame(MainWindow)
@@ -301,7 +305,6 @@ class MainApp(tk.Tk):
         if self.frame is not None:
             self.frame.destroy()
         self.frame = new_frame
-        # self.frame.pack()
         self.frame.place(relx=0.5, rely=0.5, anchor='center')
 
 
