@@ -40,7 +40,6 @@ class MainWindow(tk.Frame):
                 for p in parts:
                     curr = curr.setdefault(p, [file for file in filenames])
         self.dir_tree = dir_tree
-        # print('after:', self.dir_tree)
 
 
 class SecondWindow(tk.Frame):
@@ -95,6 +94,7 @@ class SecondWindow(tk.Frame):
         self.selected_option = tk.StringVar()
         self.selected_option.trace('w', self.on_option_change)
 
+        # TODO: Dynamically resize window to fit labels?
         for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
             self.option_radio = tk.Radiobutton(self.radio_frame, text=f'{ix+1}) {lab}', font=('Helvetica', 12),
                                                variable=self.selected_option, value=lab, pady=20, bg='white', padx=10)
@@ -108,9 +108,11 @@ class SecondWindow(tk.Frame):
         self.list_frame = tk.Frame(self.root_frame, bg='white')
         self.list_frame.pack(side='left')
 
-        # TODO: Back icon instead of text
-        self.back_button = tk.Button(self.root_frame, text="Main Menu", command=lambda: self.on_back_click(),
-                                     bg='white', padx=5, pady=5)
+        back_icon = tk.PhotoImage(file="icons/back.png").subsample(14, 14)
+        self.back_button = tk.Button(self.root_frame, image=back_icon, command=lambda: self.on_back_click(), height=50, width=50, bg='white')
+        self.back_button.image = back_icon
+        # self.back_button = tk.Button(self.root_frame, text="Main Menu", command=lambda: self.on_back_click(),
+        #                              bg='white', padx=5, pady=5)
         self.back_button.place(relx=0, rely=0, anchor='nw')
 
         self.chosen_dir_label = tk.Label(self.list_frame, text=os.path.join(self.button_name, ''),
