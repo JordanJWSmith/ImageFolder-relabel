@@ -7,6 +7,12 @@ import urllib.request
 import json
 import random
 
+with open('input_dir.json', 'r') as f:
+    input_json = json.load(f)
+    root_dir = input_json['input_dir']
+    if not root_dir:
+        root_dir = 'input/'
+
 
 def input_filepath_exists():
     return os.path.exists('input/train/') and os.path.exists('input/valid/')
@@ -15,8 +21,8 @@ def input_filepath_exists():
 def build_filepath(class_name):
     train_path = f'input/train/{class_name}/'
     valid_path = f'input/valid/{class_name}/'
-    output_path = 'outputs/'
-    for path in [train_path, valid_path, output_path]:
+    # output_path = 'outputs/'
+    for path in [train_path, valid_path]:
         if not os.path.exists(path):
             print(f'Building filepath {path}')
             os.makedirs(path)
@@ -97,7 +103,7 @@ def scrape_images(class_name, queries):
 
 
 def generate_dataset():
-    # Add image queries to image_queries.json
+    # Read image queries from image_queries.json
     # Each query currently generates ~20 images
 
     with open('image_queries.json', 'r') as f:

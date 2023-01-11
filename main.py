@@ -2,14 +2,19 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.ttk
 import os
+import json
 from PIL import ImageTk, Image
-from web_scrape import input_filepath_exists, generate_dataset
+from web_scrape import generate_dataset
 
-if not input_filepath_exists():
+with open('input_dir.json', 'r') as f:
+    input_json = json.load(f)
+    root_dir = input_json['input_dir']
+    if not root_dir:
+        root_dir = 'input/'
+    print(root_dir)
+
+if not os.path.exists(root_dir):
     generate_dataset()
-
-# TODO: take root directory from config.json file
-root_dir = 'input'
 
 
 class MainWindow(tk.Frame):

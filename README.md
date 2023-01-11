@@ -41,3 +41,6 @@ and the corresponding image labels are inferred.
 train_dataset = datasets.ImageFolder(root='input/training_data', transform=train_transform)
 valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=valid_transform)
 ```
+
+## Setup
+
