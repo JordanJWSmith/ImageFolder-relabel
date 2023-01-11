@@ -15,12 +15,12 @@ with open('input_dir.json', 'r') as f:
 
 
 def input_filepath_exists():
-    return os.path.exists('input/train/') and os.path.exists('input/valid/')
+    return os.path.exists('input/training/') and os.path.exists('input/validation/')
 
 
 def build_filepath(class_name):
-    train_path = f'input/train/{class_name}/'
-    valid_path = f'input/valid/{class_name}/'
+    train_path = f'input/training/{class_name}/'
+    valid_path = f'input/validation/{class_name}/'
     # output_path = 'outputs/'
     for path in [train_path, valid_path]:
         if not os.path.exists(path):
@@ -84,13 +84,13 @@ def scrape_images(class_name, queries):
                         if i <= test_train_boundary:
                             urllib.request.urlretrieve(
                                 link['src'],
-                                f"input/train/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
+                                f"input/training/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
                                 )
                             train_counter += 1
                         else:
                             urllib.request.urlretrieve(
                                 link['src'],
-                                f"input/valid/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
+                                f"input/validation/{class_name}/{query.replace(' ', '_')}_{i:02d}.jpg"
                                 )
                             test_counter += 1
                     except Exception as e:
@@ -99,7 +99,7 @@ def scrape_images(class_name, queries):
 
         print(f'Saved {len(image_tags) - error_counter} {query} images')
 
-    print(f"Saved {train_counter} train images and {test_counter} test images in total")
+    print(f"Saved {train_counter} training images and {test_counter} test images in total")
 
 
 def generate_dataset():
