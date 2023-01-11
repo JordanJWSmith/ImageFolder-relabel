@@ -9,12 +9,17 @@ from web_scrape import generate_dataset
 with open('input_dir.json', 'r') as f:
     input_json = json.load(f)
     root_dir = input_json['input_dir']
+
     if not root_dir:
         root_dir = 'input/'
-    print(root_dir)
 
 if not os.path.exists(root_dir):
-    generate_dataset()
+    print('Input directory not found.')
+    choice = ''
+    while choice.lower() not in ['y', 'n']:
+        choice = input('Generate webscraped dataset? y/n: ')
+        if choice == 'y':
+            generate_dataset()
 
 
 class MainWindow(tk.Frame):

@@ -43,4 +43,14 @@ valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=vali
 ```
 
 ## Setup
+Add the top level of your image directory to `congig.json`. Using the above example, this would be:
+```
+{
+    "input_dir": "input/"
+}
+```
+
+If this directory can't be found, a prompt will ask you whether you'd like to auto-generate sample data. 
+A webscraped dataset will be built using the above directory structure, allowing for a quick demo of the software. 
+Edit `image_queries.json` to amend the webscraping queries. 
 
