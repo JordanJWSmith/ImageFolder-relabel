@@ -1,8 +1,13 @@
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.ttk
-from PIL import ImageTk, Image
 import os
+from PIL import ImageTk, Image
+from web_scrape import input_filepath_exists, generate_dataset
+
+if not input_filepath_exists():
+    generate_dataset()
+
 
 # TODO: take root directory from config.json file
 root_dir = 'input'
@@ -13,8 +18,14 @@ class MainWindow(tk.Frame):
         super().__init__(master)
         self.master = master
         self.configure(bg='white')
-        self.dir_tree = {}
-        self.dir_folders = os.listdir(root_dir)
+        self.dir_folders = [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
+        self.dir_folders = []
+
+        if not len(self.dir_folders):
+            msg = "No subdirectories detected.\n" \
+                  "Please add directories containing image sets for training, validation, etc"
+            tk.messagebox.showerror("Error", msg)
+            app.destroy()
 
         for dir_button in self.dir_folders:
             self.button = tk.Button(self, text=dir_button, command=lambda k=dir_button: self.on_button_click(k),
@@ -302,5 +313,6 @@ class MainApp(tk.Tk):
         self.frame.place(relx=0.5, rely=0.5, anchor='center')
 
 
-app = MainApp()
-app.mainloop()
+if __name__ == '__main__':
+    app = MainApp()
+    app.mainloop()
