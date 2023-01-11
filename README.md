@@ -68,7 +68,7 @@ Choose which image directory you'd like to edit, then inspect the images.
 1. Cycle through images using your arrow keys or by clicking the 'next' button, or scroll through image names and click on the 
 desired entry
 2. Reassign image labels by pressing the corresponding number key or by clicking the desired radio button. 
-3. Click `Refactor` to relabel the images
+3. Click `Relabel` to relabel the images
 
 
 ## Next Steps
