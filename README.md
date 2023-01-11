@@ -42,6 +42,9 @@ train_dataset = datasets.ImageFolder(root='input/training_data', transform=train
 valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=valid_transform)
 ```
 
+`ImageFolder-relabel` is a lightweight GUI allowing users to quickly browse through these images, 
+assign new labels to any outliers and bulk refactor to relabel the images. 
+
 ## Setup
 Add the top level of your image directory to `congig.json`. Using the above example, this would be:
 ```

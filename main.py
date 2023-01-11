@@ -35,10 +35,13 @@ class MainWindow(tk.Frame):
             tk.messagebox.showerror("Error", msg)
             app.destroy()
 
+        self.instructions = tk.Label(self, text='Select a directory to view', font=('Helvetica', 14), bg='white')
+        self.instructions.pack(side='top', pady=30)
+
         for dir_button in self.dir_folders:
             self.button = tk.Button(self, text=dir_button, command=lambda k=dir_button: self.on_button_click(k),
                                     font=('Helvetica', 12))
-            self.button.pack(side='left', padx=20)
+            self.button.pack(side='top', padx=20, pady=10)
 
         self.pack(side="top", fill="both", expand=True)
 
