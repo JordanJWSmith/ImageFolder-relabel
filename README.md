@@ -70,3 +70,6 @@ desired entry
 2. Reassign image labels by pressing the corresponding number key or by clicking the desired radio button. 
 3. Click `Refactor` to relabel the images
 
+
+## Next Steps
+- Explore adding lightweight KNN to identify outliers and prioritise relabelling
