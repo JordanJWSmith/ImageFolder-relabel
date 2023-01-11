@@ -8,7 +8,6 @@ from web_scrape import input_filepath_exists, generate_dataset
 if not input_filepath_exists():
     generate_dataset()
 
-
 # TODO: take root directory from config.json file
 root_dir = 'input'
 
@@ -19,7 +18,6 @@ class MainWindow(tk.Frame):
         self.master = master
         self.configure(bg='white')
         self.dir_folders = [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
-        self.dir_folders = []
 
         if not len(self.dir_folders):
             msg = "No subdirectories detected.\n" \

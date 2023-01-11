@@ -2,10 +2,13 @@
 
 An open source GUI to enable quick and simple relabelling for Pytorch's `ImageFolder` framework. 
 
+![Demo](docs/imagefolder-relabel_demo.png)
+
 ## Pytorch ImageFolder
 
-Pytorch's `ImageFolder` class provides a convenient dataloader for image datasets. 
-By providing a root directory, `ImageFolder` infers the image labels based on the directory structure. 
+Pytorch's [datasets.ImageFolder](https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) class 
+provides a convenient dataloader for image datasets. 
+By providing a root directory, `ImageFolder` infers the image labels based on the subdirectory structure. 
 
 For example, say we're building a [sausage-detector](https://github.com/JordanJWSmith/sausage-classifier). 
 We use the following directory structure...
@@ -35,13 +38,6 @@ We pass the `training_data` and `validation_data` directories to `ImageFolder`,
 and the corresponding image labels are inferred.
 
 ```
-train_dataset = datasets.ImageFolder(
-    root='input/training_data',
-    transform=train_transform
-)
-
-valid_dataset = datasets.ImageFolder(
-    root='input/validation_data',
-    transform=valid_transform
-)
+train_dataset = datasets.ImageFolder(root='input/training_data', transform=train_transform)
+valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=valid_transform)
 ```
