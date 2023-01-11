@@ -57,6 +57,10 @@ Edit `image_queries.json` to amend the webscraping queries.
 
 ## Use
 
+Clone the repo and install the requirements using `pip install -r requirements.txt`.
+
+Run `python main.py`. 
+
 Choose which image directory you'd like to edit, then inspect the images. 
 1. Cycle through images using your arrow keys or by clicking the 'next' button, or scroll through image names and click on the 
 desired entry
