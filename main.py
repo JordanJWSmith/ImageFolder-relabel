@@ -18,7 +18,7 @@ if not os.path.exists(root_dir):
     choice = ''
     while choice.lower() not in ['y', 'n']:
         choice = input('Generate webscraped dataset? y/n: ')
-        if choice == 'y':
+        if choice.lower() == 'y':
             generate_dataset()
 
 
