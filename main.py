@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
-from tkinter import PhotoImage
+import tkinter.ttk
 from PIL import ImageTk, Image
 import os
 
@@ -14,42 +14,27 @@ class MainWindow(tk.Frame):
         self.master = master
         self.configure(bg='white')
         self.dir_tree = {}
+        self.dir_folders = os.listdir(root_dir)
 
-        self.build_dir_tree()
-
-        for ix, _dir in enumerate(self.dir_tree[root_dir].keys()):
-            self.button = tk.Button(self, text=_dir, command=lambda k=_dir: self.on_button_click(k),
+        for dir_button in self.dir_folders:
+            self.button = tk.Button(self, text=dir_button, command=lambda k=dir_button: self.on_button_click(k),
                                     font=('Helvetica', 12))
             self.button.pack(side='left', padx=20)
 
         self.pack(side="top", fill="both", expand=True)
 
     def on_button_click(self, button_name):
-        self.master.switch_frame(SecondWindow, button_name, self.dir_tree, self.build_dir_tree)
-
-    def build_dir_tree(self):
-        # print('before: ', self.dir_tree)
-        dir_tree = {}
-        for dir_path, dir_names, filenames in os.walk(root_dir):
-            parts = dir_path.split(os.sep)
-            curr = dir_tree
-            if len(dir_names):
-                for p in parts:
-                    curr = curr.setdefault(p, {})
-            else:
-                for p in parts:
-                    curr = curr.setdefault(p, [file for file in filenames])
-        self.dir_tree = dir_tree
+        root_and_dir = os.path.join(root_dir, button_name)
+        self.master.switch_frame(SecondWindow, self.dir_folders, root_and_dir)
 
 
 class SecondWindow(tk.Frame):
-    def __init__(self, master=None, button_name=None, dir_tree=None, build_dir_tree=None):
+    def __init__(self, master=None, dir_folders=None, root_and_dir=None):
         super().__init__(master)
         self.master = master
-        self.dir_tree = dir_tree
-        self.build_dir_tree = build_dir_tree
-        self.button_name = button_name
-        self.file_paths = [os.path.join(root_dir, button_name, cl) for cl in self.dir_tree[root_dir][button_name].keys()]
+        self.root_and_dir = root_and_dir
+        self.dir_folders = dir_folders
+        self.file_paths = [os.path.join(self.root_and_dir, f) for f in os.listdir(self.root_and_dir)]
         self.current_image_index = 0
         self.processed_images = {}
         self.current_image = tk.StringVar()
@@ -76,13 +61,13 @@ class SecondWindow(tk.Frame):
         self.button_frame.pack(side='bottom')
 
         # Create buttons to move to the next or previous image
-        left_icon = tk.PhotoImage(file="icons/left.png").subsample(14, 14)
+        left_icon = tk.PhotoImage(file="icons/nav/left.png").subsample(14, 14)
         self.prev_button = tk.Button(self.button_frame, image=left_icon, command=self.on_prev_click,
                                      height=50, width=50, bg='white')
         self.prev_button.image = left_icon
         self.prev_button.pack(side="left", padx=30, pady=20)
 
-        right_icon = tk.PhotoImage(file="icons/right.png").subsample(14, 14)
+        right_icon = tk.PhotoImage(file="icons/nav/right.png").subsample(14, 14)
         self.next_button = tk.Button(self.button_frame, image=right_icon, command=self.on_next_click,
                                      height=50, width=50, bg='white')
         self.next_button.image = right_icon
@@ -91,31 +76,40 @@ class SecondWindow(tk.Frame):
         self.radio_frame = tk.Frame(self.base_image_frame, bg='white')
         self.radio_frame.pack(side='bottom')
 
+        self.separator = tk.ttk.Separator(self.radio_frame, orient='horizontal')
+        self.separator.pack(fill='x')
+
         self.selected_option = tk.StringVar()
         self.selected_option.trace('w', self.on_option_change)
 
         # TODO: Dynamically resize window to fit labels?
-        for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
-            self.option_radio = tk.Radiobutton(self.radio_frame, text=f'{ix+1}) {lab}', font=('Helvetica', 12),
-                                               variable=self.selected_option, value=lab, pady=20, bg='white', padx=10)
+        for ix, lab in enumerate(os.listdir(self.root_and_dir)):
+            self.option_frame = tk.Frame(self.radio_frame, bg='white', padx=20)
+            self.option_frame.pack(side='left')
+            number_icon = tk.PhotoImage(file=f"icons/numbers/icons8-{ix+1}-100.png").subsample(2, 2)
+            self.test_icon = tk.Label(self.option_frame, image=number_icon, bg='white')
+            self.test_icon.image = number_icon
+            self.test_icon.pack(side="left")
+            self.option_radio = tk.Radiobutton(self.option_frame, text=f"{lab}", font=('Helvetica', 12),
+                                               variable=self.selected_option, value=lab, pady=20, bg='white',)
             self.option_radio.pack(side='left')
 
         # key bindings won't work with >9 classes
-        if len(self.dir_tree[root_dir][self.button_name].keys()) < 10:
+        if len(os.listdir(self.root_and_dir)) < 10:
             self.master.bind("<Key>", self.on_key_press)
 
         # Create a frame to hold the Listbox widget
         self.list_frame = tk.Frame(self.root_frame, bg='white')
         self.list_frame.pack(side='left')
 
-        back_icon = tk.PhotoImage(file="icons/back.png").subsample(14, 14)
-        self.back_button = tk.Button(self.root_frame, image=back_icon, command=lambda: self.on_back_click(), height=50, width=50, bg='white')
+        back_icon = tk.PhotoImage(file="icons/nav/back.png").subsample(20, 20)
+        self.back_button = tk.Button(self.root_frame, image=back_icon, command=lambda: self.on_back_click(),
+                                     height=40, width=40, bg='white')
         self.back_button.image = back_icon
-        # self.back_button = tk.Button(self.root_frame, text="Main Menu", command=lambda: self.on_back_click(),
-        #                              bg='white', padx=5, pady=5)
         self.back_button.place(relx=0, rely=0, anchor='nw')
 
-        self.chosen_dir_label = tk.Label(self.list_frame, text=os.path.join(self.button_name, ''),
+        dir_label = os.path.join(os.path.basename(self.root_and_dir), '')
+        self.chosen_dir_label = tk.Label(self.list_frame, text=dir_label,
                                          font=('Helvetica', 12), bg='white')
         self.chosen_dir_label.pack(side='top')
 
@@ -138,7 +132,7 @@ class SecondWindow(tk.Frame):
         self.submit_button_frame.pack(side='bottom')
 
         # TODO: Modal with 'refactor [x] images? confirmation'
-        self.submit_button = tk.Button(self.submit_button_frame, text='Submit', font=('Helvetica', 12, 'bold'),
+        self.submit_button = tk.Button(self.submit_button_frame, text='Relabel', font=('Helvetica', 12, 'bold'),
                                        bg='#008CBA', fg='white', command=lambda: self.refactor_images())
         self.submit_button.pack(side="bottom", padx=20, pady=20)
 
@@ -199,9 +193,9 @@ class SecondWindow(tk.Frame):
         for f_name, label in self.processed_images.items():
             if os.path.basename(os.path.dirname(f_name)) != label:
                 try:
-                    new_path = os.path.join(root_dir, self.button_name, label, os.path.basename(f_name))
+                    new_path = os.path.join(self.root_and_dir, label, os.path.basename(f_name))
                     print('refactoring:', f_name, '->',
-                          os.path.join(root_dir, self.button_name, label, os.path.basename(f_name)))
+                          os.path.join(self.root_and_dir, label, os.path.basename(f_name)))
                     os.rename(f_name, new_path)
                 except Exception as e:
                     tk.messagebox.showinfo("Info", f'Error refactoring {f_name}. Error message:\n{e}')
@@ -212,15 +206,13 @@ class SecondWindow(tk.Frame):
 
     def refresh_window(self):
         self.processed_images = {}
-        self.build_dir_tree()
         self.build_filepaths()
         self.get_filenames()
         self.populate_image_list()
         self.display_images()
 
     def build_filepaths(self):
-        self.file_paths = [os.path.join(root_dir, self.button_name, cl)
-                           for cl in self.dir_tree[root_dir][self.button_name].keys()]
+        self.file_paths = [os.path.join(self.root_and_dir, f) for f in os.listdir(self.root_and_dir)]
 
     def populate_image_list(self):
         self.image_list.delete(0, "end")
@@ -242,7 +234,7 @@ class SecondWindow(tk.Frame):
 
         # key bindings to select radio button
         if event.keysym in str_nums:
-            for ix, lab in enumerate(self.dir_tree[root_dir][self.button_name].keys()):
+            for ix, lab in enumerate(os.listdir(self.root_and_dir)):
                 if event.char == str(ix+1):
                     self.selected_option.set(lab)
 
