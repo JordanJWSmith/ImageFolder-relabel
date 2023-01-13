@@ -43,7 +43,7 @@ We use the following directory structure...
             
 ```
 
-By passing the `training` and `validation` directories to `ImageFolder`, the images are loaded and
+By passing the `training` and `validation` directory paths to `ImageFolder`, the images are loaded and
 the corresponding labels are inferred from their subdirectories.
 
 ```
@@ -54,7 +54,9 @@ valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=vali
 `ImageFolder-relabel` is a lightweight GUI allowing users to quickly browse through these images, 
 assign new labels to any outliers and bulk refactor to relabel the images. 
 
-## Setup
+## Use
+Clone the repo and install the requirements using `pip install -r requirements.txt`.
+
 Add the top level of your image directory to `config.json`. Using the above example, this would be:
 ```
 {
@@ -65,17 +67,13 @@ Add the top level of your image directory to `config.json`. Using the above exam
 If this directory can't be found, a prompt will ask you whether you'd like to auto-generate sample data. 
 A webscraped dataset will be built using the above directory structure, allowing for a quick demo of the software. 
 
-Edit `image_queries.json` to amend the webscraping queries. 
+Edit `image_queries.json` to amend the webscraping queries.
 
-## Use
-
-Clone the repo and install the requirements using `pip install -r requirements.txt`.
-
-Run `python main.py`. 
+Run `python main.py` to open the GUI. 
 
 Choose which image directory you'd like to edit, then inspect the images. 
-1. Cycle through images using your arrow keys or by clicking the 'next' button, or scroll through image names and click on the 
-desired entry
+1. Cycle through images using your arrow keys or by clicking the 'next' button, or scroll through image names and 
+click on the desired entry
 2. Reassign image labels by pressing the corresponding number key or by clicking the desired radio button. 
 3. Click `Relabel` to relabel the images
 
