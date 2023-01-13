@@ -1,10 +1,19 @@
 # ImageFolder-relabel
 
-An open source GUI to enable quick and simple relabelling for Pytorch's `ImageFolder` dataset framework. 
+An open source GUI to enable quick and simple relabelling for Pytorch's `ImageFolder` dataset framework (or any other
+ML `ImageFolder` framework for that matter). 
 
 ![Demo](docs/imagefolder-relabel_demo.png)
 
 ## Pytorch ImageFolder
+
+Several machine learning frameworks exist that use a dataset's directory structure to understand which pieces of data 
+belong to which class. When training a CV model this way, images are read from a folder where the folder 
+name corresponds to the class it belongs to. Libraries such as 
+[ML.NET](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.data.imageloadingtransformer.imagefolder?view=ml-dotnet), 
+[Tensorflow](https://www.tensorflow.org/datasets/api_docs/python/tfds/folder_dataset/ImageFolder) and 
+[Pytorch] (https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) 
+all have `ImageFolder` classes for this purpose. For example's sake, we'll use Pytorch. 
 
 Pytorch's [datasets.ImageFolder](https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) class 
 provides a convenient dataloader for image datasets. 
@@ -46,7 +55,7 @@ valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=vali
 assign new labels to any outliers and bulk refactor to relabel the images. 
 
 ## Setup
-Add the top level of your image directory to `congig.json`. Using the above example, this would be:
+Add the top level of your image directory to `config.json`. Using the above example, this would be:
 ```
 {
     "input_dir": "input/"
