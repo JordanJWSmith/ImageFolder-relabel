@@ -12,7 +12,7 @@ belong to which class. When training a CV model this way, images are read from a
 name corresponds to the class it belongs to. Libraries such as 
 [ML.NET](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.data.imageloadingtransformer.imagefolder?view=ml-dotnet), 
 [Tensorflow](https://www.tensorflow.org/datasets/api_docs/python/tfds/folder_dataset/ImageFolder) and 
-[Pytorch] (https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) 
+[Pytorch](https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) 
 all have `ImageFolder` classes for this purpose. For example's sake, we'll use Pytorch. 
 
 Pytorch's [datasets.ImageFolder](https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) class 
