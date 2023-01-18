@@ -3,7 +3,7 @@ import tkinter.messagebox
 import tkinter.ttk
 import os
 import json
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageDraw
 from web_scrape import generate_dataset
 
 with open('input_dir.json', 'r') as f:
@@ -61,6 +61,7 @@ class SecondWindow(tk.Frame):
         self.processed_images = {}
         self.current_image = tk.StringVar()
         self.filenames = []
+        self.image = None
 
         self.get_filenames()
 
@@ -78,6 +79,13 @@ class SecondWindow(tk.Frame):
         # Create a label to display the image
         self.image_label = tk.Label(self.base_image_frame, bg='white')
         self.image_label.pack(side='top')
+
+        self.image_label.bind("<ButtonPress-1>", self.bb_on_press)
+        self.image_label.bind("<B1-Motion>", self.bb_on_motion)
+        self.image_label.bind("<ButtonRelease-1>", self.bb_on_release)
+
+        self.start_x, self.start_y = None, None
+        self.rect = None
 
         self.button_frame = tk.Frame(self.base_image_frame, bg='white')
         self.button_frame.pack(side='bottom')
@@ -164,10 +172,42 @@ class SecondWindow(tk.Frame):
             self.width, self.height = max(image.size[0], self.width), max(image.size[1], self.height)
         self.master.geometry(f"{self.width + 400}x{self.height + 200}")
         self.image_list.configure(height=int(self.height / 21))
+        self.image_label.configure(height=self.height, width=self.width)
 
         # Display the first image
         self.display_images()
         self.pack()
+
+    def bb_on_press(self, event):
+        self.display_images()
+        img_x = event.x - (self.width - self.image.width) // 2
+        img_y = event.y - (self.height - self.image.height) // 2
+        if 0 < img_x <= self.image.width and 0 < img_y <= self.image.height:
+            self.start_x, self.start_y = img_x, img_y
+
+    def bb_on_motion(self, event):
+        img_x = event.x - (self.width - self.image.width) // 2
+        img_y = event.y - (self.height - self.image.height) // 2
+        if self.start_x is not None and self.start_y is not None and 0 < img_x <= self.image.width and 0 < img_y <= self.image.height:
+            if self.rect:
+                self.display_images()
+
+            self.rect = (self.start_x, self.start_y, img_x, img_y)
+            self.draw.rectangle(xy=self.rect, outline="red")
+            self.photo_image = ImageTk.PhotoImage(self.image)
+            self.image_label.configure(image=self.photo_image)
+
+    def bb_on_release(self, event):
+        # print('release')
+        img_x = event.x - (self.width - self.image.width) // 2
+        img_y = event.y - (self.height - self.image.height) // 2
+        if 0 < img_x <= self.image.width and 0 < img_y <= self.image.height and self.start_x and self.start_y:
+
+            end_x, end_y = img_x, img_y
+            bbox = [self.start_x, self.start_y, end_x, end_y]
+            print(bbox)
+            self.start_x, self.start_y = None, None
+            self.rect = None
 
     def on_list_double_click(self, event):
         selection = self.image_list.curselection()
@@ -191,6 +231,8 @@ class SecondWindow(tk.Frame):
         self.display_images()
         self.image_list.selection_set(self.current_image_index)
         self.image_list.see(self.current_image_index)
+        self.start_x, self.start_y = None, None
+        self.rect = None
 
     def on_prev_click(self):
         self.image_list.selection_clear(0, 'end')
@@ -198,6 +240,8 @@ class SecondWindow(tk.Frame):
         self.display_images()
         self.image_list.selection_set(self.current_image_index)
         self.image_list.see(self.current_image_index)
+        self.start_x, self.start_y = None, None
+        self.rect = None
 
     def get_filenames(self):
         f_names = []
@@ -284,11 +328,15 @@ class SecondWindow(tk.Frame):
                 image_label = os.path.normpath(image_path).split(os.path.sep)[-2]
                 self.selected_option.set(image_label)
 
-            image = Image.open(image_path)
-            background = Image.new('RGBA', (self.width, self.height), (255, 255, 255, 255))
-            offset = ((self.width - image.size[0]) // 2, (self.height - image.size[1]) // 2)
-            background.paste(image, offset)
-            photo_image = ImageTk.PhotoImage(background)
+            self.image = Image.open(image_path)
+            # background = Image.new('RGBA', (self.width, self.height), (255, 255, 255, 255))
+            # offset = ((self.width - image.size[0]) // 2, (self.height - image.size[1]) // 2)
+            # background.paste(image, offset)
+            # photo_image = ImageTk.PhotoImage(background)
+            photo_image = ImageTk.PhotoImage(self.image)
+
+            self.draw = ImageDraw.Draw(self.image)
+
             self.image_label.configure(image=photo_image)
             self.image_label.image = photo_image
 
