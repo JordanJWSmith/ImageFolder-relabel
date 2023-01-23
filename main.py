@@ -62,9 +62,11 @@ class SecondWindow(tk.Frame):
         self.current_image = tk.StringVar()
         self.filenames = []
         self.image = None
-        self.bounding_boxes = {}  # TODO: read from file
+        self.bounding_boxes = {}
+        self.master.protocol("WM_DELETE_WINDOW", self.exit_app)
 
         self.get_filenames()
+        self.get_bounding_boxes()
 
         self.configure(bg='white')
 
@@ -139,6 +141,10 @@ class SecondWindow(tk.Frame):
         self.back_button.image = back_icon
         self.back_button.place(relx=0, rely=0, anchor='nw')
 
+        self.clear_bboxes_button = tk.Button(self.root_frame, text='Clear BBoxes', bg='white',
+                                      command=self.clear_bboxes)
+        self.clear_bboxes_button.place(relx=0.1, rely=0, anchor='nw')
+
         dir_label = os.path.join(os.path.basename(self.root_and_dir), '')
         self.chosen_dir_label = tk.Label(self.list_frame, text=dir_label,
                                          font=('Helvetica', 12), bg='white')
@@ -179,6 +185,14 @@ class SecondWindow(tk.Frame):
         self.display_images()
         self.pack()
 
+    # TODO: General bounding box user story
+    # TODO: Ability to remove individual bounding boxes/wipe all
+    # TODO: Button to save bounding boxes? Or autosave?
+
+    def get_bounding_boxes(self):
+        bbox_f = open('bounding_boxes.json')
+        self.bounding_boxes = json.load(bbox_f)
+
     def bb_on_press(self, event):
         img_x = event.x - (self.width - self.image.width) // 2
         img_y = event.y - (self.height - self.image.height) // 2
@@ -213,9 +227,21 @@ class SecondWindow(tk.Frame):
                 else:
                     self.bounding_boxes[self.current_image.get()] = [bbox]
 
+            # self.write_bboxes()
+
             print(self.bounding_boxes)
             self.start_x, self.start_y = None, None
             self.rect = None
+
+    def write_bboxes(self):
+        json_object = json.dumps(self.bounding_boxes, indent=4)
+        with open("bounding_boxes.json", "w") as outfile:
+            outfile.write(json_object)
+
+    def clear_bboxes(self):
+        # self.bounding_boxes[self.current_image.get()] = []
+        del self.bounding_boxes[self.current_image.get()]
+        self.display_images()
 
     def on_list_double_click(self, event):
         selection = self.image_list.curselection()
@@ -323,7 +349,6 @@ class SecondWindow(tk.Frame):
     def display_images(self):
 
         # TODO: Set maximum image size as a percentage of screen size and resize
-
         if 0 <= self.current_image_index < len(self.filenames):
             image_path = self.filenames[self.current_image_index]
             self.label.config(text=os.path.split(image_path)[-1])
@@ -337,13 +362,14 @@ class SecondWindow(tk.Frame):
                 self.selected_option.set(image_label)
 
             self.image = Image.open(image_path)
-            # photo_image = ImageTk.PhotoImage(self.image)
-
             self.draw = ImageDraw.Draw(self.image)
 
             if image_path in self.bounding_boxes.keys():
+                self.clear_bboxes_button.config(state="normal")
                 for xy in self.bounding_boxes[image_path]:
                     self.draw.rectangle(xy=xy, outline="red")
+            else:
+                self.clear_bboxes_button.config(state="disabled")
 
             photo_image = ImageTk.PhotoImage(self.image)
 
@@ -363,7 +389,12 @@ class SecondWindow(tk.Frame):
             tk.messagebox.showinfo("Info", "No more images to display")
 
     def on_back_click(self):
+        self.write_bboxes()
         self.master.switch_frame(MainWindow)
+
+    def exit_app(self):
+        self.write_bboxes()
+        app.destroy()
 
 
 class MainApp(tk.Tk):
