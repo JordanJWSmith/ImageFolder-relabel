@@ -62,6 +62,7 @@ class SecondWindow(tk.Frame):
         self.current_image = tk.StringVar()
         self.filenames = []
         self.image = None
+        self.bounding_boxes = {}  # TODO: read from file
 
         self.get_filenames()
 
@@ -179,16 +180,17 @@ class SecondWindow(tk.Frame):
         self.pack()
 
     def bb_on_press(self, event):
-        self.display_images()
         img_x = event.x - (self.width - self.image.width) // 2
         img_y = event.y - (self.height - self.image.height) // 2
         if 0 < img_x <= self.image.width and 0 < img_y <= self.image.height:
+            self.display_images()
             self.start_x, self.start_y = img_x, img_y
 
     def bb_on_motion(self, event):
         img_x = event.x - (self.width - self.image.width) // 2
         img_y = event.y - (self.height - self.image.height) // 2
-        if self.start_x is not None and self.start_y is not None and 0 < img_x <= self.image.width and 0 < img_y <= self.image.height:
+        if self.start_x is not None and self.start_y is not None \
+                and 0 < img_x <= self.image.width and 0 < img_y <= self.image.height:
             if self.rect:
                 self.display_images()
 
@@ -198,14 +200,20 @@ class SecondWindow(tk.Frame):
             self.image_label.configure(image=self.photo_image)
 
     def bb_on_release(self, event):
-        # print('release')
         img_x = event.x - (self.width - self.image.width) // 2
         img_y = event.y - (self.height - self.image.height) // 2
         if 0 < img_x <= self.image.width and 0 < img_y <= self.image.height and self.start_x and self.start_y:
-
             end_x, end_y = img_x, img_y
             bbox = [self.start_x, self.start_y, end_x, end_y]
-            print(bbox)
+
+            min_bbox_size = 10
+            if abs(self.start_x - end_x) > min_bbox_size and abs(self.start_y - end_y) > min_bbox_size:
+                if self.current_image.get() in self.bounding_boxes.keys():
+                    self.bounding_boxes[self.current_image.get()].append(bbox)
+                else:
+                    self.bounding_boxes[self.current_image.get()] = [bbox]
+
+            print(self.bounding_boxes)
             self.start_x, self.start_y = None, None
             self.rect = None
 
@@ -329,13 +337,15 @@ class SecondWindow(tk.Frame):
                 self.selected_option.set(image_label)
 
             self.image = Image.open(image_path)
-            # background = Image.new('RGBA', (self.width, self.height), (255, 255, 255, 255))
-            # offset = ((self.width - image.size[0]) // 2, (self.height - image.size[1]) // 2)
-            # background.paste(image, offset)
-            # photo_image = ImageTk.PhotoImage(background)
-            photo_image = ImageTk.PhotoImage(self.image)
+            # photo_image = ImageTk.PhotoImage(self.image)
 
             self.draw = ImageDraw.Draw(self.image)
+
+            if image_path in self.bounding_boxes.keys():
+                for xy in self.bounding_boxes[image_path]:
+                    self.draw.rectangle(xy=xy, outline="red")
+
+            photo_image = ImageTk.PhotoImage(self.image)
 
             self.image_label.configure(image=photo_image)
             self.image_label.image = photo_image
