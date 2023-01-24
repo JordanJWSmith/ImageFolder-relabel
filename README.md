@@ -55,6 +55,8 @@ valid_dataset = datasets.ImageFolder(root='input/validation_data',transform=vali
 assign new labels to any outliers and bulk refactor to relabel the images. 
 
 ## Use
+
+### Setup
 Clone the repo and install the requirements using `pip install -r requirements.txt`.
 
 Add the top level of your image directory to `config.json`. Using the above example, this would be:
@@ -69,6 +71,8 @@ A webscraped dataset will be built using the above directory structure, allowing
 
 Edit `image_queries.json` to amend the webscraping queries.
 
+### Main Usage
+
 Run `python main.py` to open the GUI. 
 
 Choose which image directory you'd like to edit, then inspect the images. 
@@ -76,6 +80,31 @@ Choose which image directory you'd like to edit, then inspect the images.
 click on the desired entry
 2. Reassign image labels by pressing the corresponding number key or by clicking the desired radio button. 
 3. Click `Relabel` to relabel the images
+
+### Bounding Boxes
+Create bounding boxes by simply clicking and dragging on the image. Click 'Clear BBoxes' to remove.
+
+![Bounding Boxes](docs/bounding_box_demo.png)
+
+Coordinates are written to `bounding_boxes.json`, ready to be exported to your model training pipeline. For example:
+
+```JSON
+{
+    "input/training\\sausage\\sausages_39.jpg": [
+        [403, 159, 491, 209],
+        [238, 239, 283, 290],
+        [29, 175, 85, 212]
+    ],
+    "input/training\\sausage\\sausage_28.jpg": [
+        [125, 141, 236, 218],
+        [220, 166, 327, 210],
+        [78, 235, 303, 285],
+        [320, 223, 473, 301]
+    ]
+}
+```
+
+
 
 
 ## Next Steps

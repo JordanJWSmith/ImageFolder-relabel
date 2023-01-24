@@ -1,3 +1,48 @@
 {
-    "input/training\\non_sausage\\cheeseburger_1.jpg": []
+    "input/training\\sausage\\sausages_39.jpg": [
+        [
+            403,
+            159,
+            491,
+            209
+        ],
+        [
+            238,
+            239,
+            283,
+            290
+        ],
+        [
+            29,
+            175,
+            85,
+            212
+        ]
+    ],
+    "input/training\\sausage\\sausage_28.jpg": [
+        [
+            125,
+            141,
+            236,
+            218
+        ],
+        [
+            220,
+            166,
+            327,
+            210
+        ],
+        [
+            78,
+            235,
+            303,
+            285
+        ],
+        [
+            320,
+            223,
+            473,
+            301
+        ]
+    ]
 }

@@ -208,7 +208,7 @@ class SecondWindow(tk.Frame):
                 self.display_images()
 
             self.rect = (self.start_x, self.start_y, img_x, img_y)
-            self.draw.rectangle(xy=self.rect, outline="red")
+            self.draw.rectangle(xy=self.rect, outline="red", width=3)
             self.photo_image = ImageTk.PhotoImage(self.image)
             self.image_label.configure(image=self.photo_image)
 
@@ -250,6 +250,7 @@ class SecondWindow(tk.Frame):
     def remove_bbox(self, xy):
         print('removing', xy, 'from', self.bounding_boxes[self.current_image.get()])
         self.bounding_boxes[self.current_image.get()].remove(xy)
+        # self.clear_buttons[str(xy)].destroy()
         self.display_images()
 
     def on_enter(self, event):
@@ -382,17 +383,25 @@ class SecondWindow(tk.Frame):
             self.image = Image.open(image_path)
             self.draw = ImageDraw.Draw(self.image)
 
+            # x_icon = tk.PhotoImage(file="icons/x_icon.png").subsample(20, 20)
+
             if image_path in self.bounding_boxes.keys():
                 self.clear_bboxes_button.config(state="normal")
-                for xy in self.bounding_boxes[image_path]:
-                    self.draw.rectangle(xy=xy, outline="red")
+                for i, xy in enumerate(self.bounding_boxes[image_path]):
+                    self.draw.rectangle(xy=xy, outline="red", width=3)
+                    # bbox_rect = self.transparent_canvas.create_rectangle(*xy, outline="", tags=f"bbox{i}")
+                    # self.transparent_canvas.tag_bind(f"bbox{i}", "<Button-1>", lambda event, i=i: self.delete_bbox(event, i))
 
                     # add remove button
-                    self.remove_bbox_button = tk.Button(self.image_label, text='x',
-                                                        command=lambda x=xy: self.remove_bbox(x))
-                    translated_x = xy[2] + (self.width - self.image.width) // 2
-                    translated_y = xy[1] + (self.height - self.image.height) // 2
-                    self.remove_bbox_button.place(x=translated_x, y=translated_y)
+                    # self.remove_bbox_button = tk.Button(self.image_label, image=x_icon, bg='white',
+                    #                                     command=lambda x=xy: [self.remove_bbox(x),
+                    #                                                           self.remove_bbox_button.destroy()])
+                    # self.remove_bbox_button.image = x_icon
+                    # TODO: fix issue of buttons reappearing after destroyed
+                    # translated_x = xy[2] + (self.width - self.image.width) // 2
+                    # translated_y = xy[1] + (self.height - self.image.height) // 2
+                    # self.remove_bbox_button.place(x=translated_x, y=translated_y)
+
             else:
                 self.clear_bboxes_button.config(state="disabled")
 
