@@ -86,6 +86,7 @@ class SecondWindow(tk.Frame):
         self.image_label.bind("<ButtonPress-1>", self.bb_on_press)
         self.image_label.bind("<B1-Motion>", self.bb_on_motion)
         self.image_label.bind("<ButtonRelease-1>", self.bb_on_release)
+        self.image_label.bind("<Motion>", self.on_enter)
 
         self.start_x, self.start_y = None, None
         self.rect = None
@@ -185,9 +186,7 @@ class SecondWindow(tk.Frame):
         self.display_images()
         self.pack()
 
-    # TODO: General bounding box user story
-    # TODO: Ability to remove individual bounding boxes/wipe all
-    # TODO: Button to save bounding boxes? Or autosave?
+    # TODO: Ability to remove individual bounding boxes
 
     def get_bounding_boxes(self):
         bbox_f = open('bounding_boxes.json')
@@ -218,7 +217,12 @@ class SecondWindow(tk.Frame):
         img_y = event.y - (self.height - self.image.height) // 2
         if 0 < img_x <= self.image.width and 0 < img_y <= self.image.height and self.start_x and self.start_y:
             end_x, end_y = img_x, img_y
-            bbox = [self.start_x, self.start_y, end_x, end_y]
+
+            # sort bbox coords so they always start in top left
+            sorted_xs = sorted([self.start_x, end_x])
+            sorted_ys = sorted([self.start_y, end_y])
+            # bbox = [self.start_x, self.start_y, end_x, end_y]
+            bbox = [sorted_xs[0], sorted_ys[0], sorted_xs[1], sorted_ys[1]]
 
             min_bbox_size = 10
             if abs(self.start_x - end_x) > min_bbox_size and abs(self.start_y - end_y) > min_bbox_size:
@@ -230,6 +234,7 @@ class SecondWindow(tk.Frame):
             # self.write_bboxes()
 
             print(self.bounding_boxes)
+            self.display_images()
             self.start_x, self.start_y = None, None
             self.rect = None
 
@@ -239,9 +244,22 @@ class SecondWindow(tk.Frame):
             outfile.write(json_object)
 
     def clear_bboxes(self):
-        # self.bounding_boxes[self.current_image.get()] = []
         del self.bounding_boxes[self.current_image.get()]
         self.display_images()
+
+    # def remove_bbox(self, xy):
+    #     print('removing', xy, 'from', self.bounding_boxes[self.current_image.get()])
+    #     self.bounding_boxes[self.current_image.get()].remove(xy)
+    #     self.display_images()
+
+    def on_enter(self, event):
+        if self.current_image.get() in self.bounding_boxes.keys():
+            img_x = event.x - (self.width - self.image.width) // 2
+            img_y = event.y - (self.height - self.image.height) // 2
+            bboxes = self.bounding_boxes[self.current_image.get()]
+            for bbox in bboxes:
+                if bbox[0] <= img_x <= bbox[2] and bbox[1] <= img_y <= bbox[3]:
+                    print('within bbox', bbox)
 
     def on_list_double_click(self, event):
         selection = self.image_list.curselection()
@@ -368,6 +386,12 @@ class SecondWindow(tk.Frame):
                 self.clear_bboxes_button.config(state="normal")
                 for xy in self.bounding_boxes[image_path]:
                     self.draw.rectangle(xy=xy, outline="red")
+
+                    # add remove button
+                    # self.remove_bbox_button = tk.Button(self.image_label, text='x', command=lambda: self.remove_bbox(xy))
+                    # translated_x = xy[2] + (self.width - self.image.width) // 2
+                    # translated_y = xy[1] + (self.height - self.image.height) // 2
+                    # self.remove_bbox_button.place(x=translated_x, y=translated_y)
             else:
                 self.clear_bboxes_button.config(state="disabled")
 
