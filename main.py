@@ -247,10 +247,10 @@ class SecondWindow(tk.Frame):
         del self.bounding_boxes[self.current_image.get()]
         self.display_images()
 
-    # def remove_bbox(self, xy):
-    #     print('removing', xy, 'from', self.bounding_boxes[self.current_image.get()])
-    #     self.bounding_boxes[self.current_image.get()].remove(xy)
-    #     self.display_images()
+    def remove_bbox(self, xy):
+        print('removing', xy, 'from', self.bounding_boxes[self.current_image.get()])
+        self.bounding_boxes[self.current_image.get()].remove(xy)
+        self.display_images()
 
     def on_enter(self, event):
         if self.current_image.get() in self.bounding_boxes.keys():
@@ -388,10 +388,11 @@ class SecondWindow(tk.Frame):
                     self.draw.rectangle(xy=xy, outline="red")
 
                     # add remove button
-                    # self.remove_bbox_button = tk.Button(self.image_label, text='x', command=lambda: self.remove_bbox(xy))
-                    # translated_x = xy[2] + (self.width - self.image.width) // 2
-                    # translated_y = xy[1] + (self.height - self.image.height) // 2
-                    # self.remove_bbox_button.place(x=translated_x, y=translated_y)
+                    self.remove_bbox_button = tk.Button(self.image_label, text='x',
+                                                        command=lambda x=xy: self.remove_bbox(x))
+                    translated_x = xy[2] + (self.width - self.image.width) // 2
+                    translated_y = xy[1] + (self.height - self.image.height) // 2
+                    self.remove_bbox_button.place(x=translated_x, y=translated_y)
             else:
                 self.clear_bboxes_button.config(state="disabled")
 
